@@ -111,7 +111,7 @@ function getResponseDataJson(error, data) {
 function listConfigs(resultFunc) {
   $.ajax({
     type: 'GET',
-    url: 'command/list_configs',
+    url: 'command/list_configs?ns='+getNS(),  //NPF MODIFIED
     dataType: 'text',
     error: function(request, textStatus) {
       getResponseDataJson(textStatus);
@@ -135,7 +135,7 @@ function listJobs(cursor, resultFunc) {
   setButter('Loading');
   $.ajax({
     type: 'GET',
-    url: 'command/list_jobs?cursor=' + cursor,
+    url: 'command/list_jobs?ns='+getNS() + '&cursor=' + cursor,  //NPF MODIFIED
     dataType: 'text',
     error: function(request, textStatus) {
       getResponseDataJson(textStatus);
@@ -163,7 +163,7 @@ function cleanUpJob(name, mapreduce_id) {
   $.ajax({
     async: false,
     type: 'POST',
-    url: 'command/cleanup_job',
+    url: 'command/cleanup_job?ns='+getNS(),  //NPF MODIFIED
     data: {'mapreduce_id': mapreduce_id},
     dataType: 'text',
     error: function(request, textStatus) {
@@ -190,7 +190,7 @@ function abortJob(name, mapreduce_id) {
   $.ajax({
     async: false,
     type: 'POST',
-    url: 'command/abort_job',
+    url: 'command/abort_job?ns='+getNS(),  //NPF MODIFIED
     data: {'mapreduce_id': mapreduce_id},
     dataType: 'text',
     error: function(request, textStatus) {
@@ -209,7 +209,7 @@ function abortJob(name, mapreduce_id) {
 function getJobDetail(jobId, resultFunc) {
   $.ajax({
     type: 'GET',
-    url: 'command/get_job_detail',
+    url: 'command/get_job_detail?ns='+getNS(),  //NPF MODIFIED
     dataType: 'text',
     data: {'mapreduce_id': jobId},
     statusCode: {
@@ -301,6 +301,16 @@ function getJobId() {
   return jobId == null ? '' : jobId;
 }
 
+// NPF ADDED - namespace option
+function qs(key) {
+    key = key.replace(/[*+?^$.\[\]{}()|\\\/]/g, "\\$&"); // escape RegEx meta chars
+    var match = location.search.match(new RegExp("[?&]"+key+"=([^&]+)(&|$)"));
+    return match && decodeURIComponent(match[1].replace(/\+/g, " "));
+}
+function getNS() {
+  return qs('ns') || '';
+}
+
 /********* Specific to overview status page *********/
 
 //////// Running jobs overview.
@@ -326,7 +336,7 @@ function initJobOverview(jobs, cursor) {
 
     $('<td>').append(
       $('<a>')
-        .attr('href', 'detail?mapreduce_id=' + job.mapreduce_id)
+        .attr('href', 'detail?ns='+getNS()+'&mapreduce_id=' + job.mapreduce_id)  //NPF MODIFIED
         .text('Detail')).appendTo(row);
 
     row.append($('<td>').text(job.mapreduce_id))
@@ -424,7 +434,7 @@ function runJob(name) {
   jobForm.find('input[type="submit"]').disabled = true;
   $.ajax({
     type: 'POST',
-    url: 'command/start_job',
+    url: 'command/start_job?ns='+getNS(),  //NPF MODIFIED
     data: jobForm.serialize(),
     dataType: 'text',
     error: function(request, textStatus) {

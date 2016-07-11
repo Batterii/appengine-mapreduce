@@ -213,6 +213,11 @@ class JsonHandler(webapp.RequestHandler):
           403, message="Got JSON request with no X-Requested-With header")
       return
 
+    #NPF ADDED
+    ns = self.request.get('ns')
+    from google.appengine.api import namespace_manager
+    if ns: namespace_manager.set_namespace(ns)
+
     self.json_response.clear()
     try:
       self.handle()

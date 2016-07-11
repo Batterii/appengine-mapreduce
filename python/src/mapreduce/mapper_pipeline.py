@@ -102,8 +102,9 @@ class MapperPipeline(pipeline_base._OutputSlotsMixin,
         queue_name=self.queue_name,
         )
     self.fill(self.outputs.job_id, mapreduce_id)
-    self.set_status(console_url="%s/detail?mapreduce_id=%s" % (
-        (base_path, mapreduce_id)))
+    from google.appengine.api import namespace_manager  # NPF ADDED
+    self.set_status(console_url="%s/detail?mapreduce_id=%s&ns=%s" % (  # NPF MODIFIED
+        (parameters.config.BASE_PATH, mapreduce_id, namespace_manager.get_namespace())))
 
   def try_cancel(self):
     """Always allow mappers to be canceled and retried."""
