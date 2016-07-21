@@ -689,6 +689,7 @@ function initJobDetail(jobId, detail) {
   $('head > title').text(title);
   $('#detail-page-title').text(detail.name);
   $('#detail-page-undertext').text('Job #' + jobId);
+  $('#overview-link a').attr('href', 'status?ns='+getNS());  //NPF modified
 
   // Set control buttons.
   if (self != top) {
