@@ -708,7 +708,9 @@ class DatastoreInputReader(AbstractDatastoreInputReader):
       # Validate the value of each filter. We need to know filters have
       # valid value to carry out splits.
       try:
-        properties[prop]._do_validate(val)
+        # NPF - modifed because _do_validate is not meant to be called with None
+        if val is not None:
+          properties[prop]._do_validate(val)
       except db.BadValueError, e:
         raise errors.BadReaderParamsError(e)
 

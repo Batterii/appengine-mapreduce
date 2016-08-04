@@ -215,7 +215,7 @@ class PropertyRange(object):
       for f in self.filters:
         query.filter("%s %s" % (f[0], f[1]), f[2])
     else:
-      query = self.model_class.query(namespace=ns)
+      query = self.model_class._query(namespace=ns)  # NPF - modified to use NDB's _query, in case subclass has overridden
       for f in self.filters:
         query = query.filter(ndb.FilterNode(*f))
     return query
@@ -400,6 +400,19 @@ def _ord_to_str(ordinal, weights):
   return "".join(chars)
 
 
+# NPF - added... so we can do inequality on KeyProperties (provide a range)
+def _split_key_property(start, end, n, include_start, include_end):
+  start_id, end_id = start.id(), end.id()
+  if type(start_id) != type(end_id):
+    raise ValueError("key range must have IDs of same type:  got %s(%s) and %s(%s)" % (
+    type(start_id).__name__, start_id, type(end_id).__name__, end_id))
+  if isinstance(start_id, (int, long)):
+    splitpoints = _split_integer_property(start_id, end_id, n, include_start, include_end)
+  else:
+    splitpoints = _split_string_property(start_id, end_id, n, include_start, include_end)
+  return [ndb.Key(start.kind(), id, parent=start.parent(), namespace=start.namespace(), app=start.app()) for id in splitpoints]
+
+
 # discrete property split functions all have the same interface.
 # They take start, end, shard_number n, include_start, include_end.
 # They return at most n+1 points, forming n ranges.
@@ -413,7 +426,8 @@ _DISCRETE_PROPERTY_SPLIT_FUNCTIONS = {
     ndb.DateTimeProperty: _split_datetime_property,
     ndb.IntegerProperty: _split_integer_property,
     ndb.StringProperty: _split_string_property,
-    ndb.BlobProperty: _split_byte_string_property
+    ndb.BlobProperty: _split_byte_string_property,
+    ndb.KeyProperty: _split_key_property  # NPF - added... so we can do inequality on KeyProperties (provide a range)
 }
 
 _CONTINUOUS_PROPERTY_SPLIT_FUNCTIONS = {
