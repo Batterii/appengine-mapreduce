@@ -2,3 +2,4 @@ MANIFEST
 *.pyc
 .idea
 *.iml
+python/src/GoogleAppEngineMapReduce.egg-info/
