@@ -380,8 +380,7 @@ def _set_ndb_cache_policy():
   """
   ndb_ctx = ndb.get_context()
   ndb_ctx.set_cache_policy(lambda key: False)
-  # NPF changed:  http://stackoverflow.com/questions/26223098/ndb-models-are-not-saved-in-memcache-when-using-mapreduce
-  # ndb_ctx.set_memcache_policy(lambda key: False)
+  ndb_ctx.set_memcache_policy(lambda key: False)
 
 
 def _obj_to_path(obj):
