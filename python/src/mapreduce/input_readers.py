@@ -450,6 +450,9 @@ class AbstractDatastoreInputReader(InputReader):
     if filters:
       ds_query_with_filters = copy.copy(ds_query)
       for (key, op, value) in filters:
+        # NPF - modifed because datastore queries need old ds keys
+        if isinstance(value, ndb.Key):
+          value = value.to_old_key()
         ds_query_with_filters.update({'%s %s' % (key, op): value})
         try:
           random_keys = ds_query_with_filters.Get(shard_count *
@@ -686,10 +689,10 @@ class DatastoreInputReader(AbstractDatastoreInputReader):
 
     properties = model_class._properties
 
-
     for idx, f in enumerate(filters):
       prop, ineq, val = f
-      if prop not in properties:
+      # NPF modified to allow querying by Model.key == XXX
+      if prop != 'key' and prop not in properties:
         raise errors.BadReaderParamsError(
             "Property %s is not defined for entity type %s",
             prop, model_class._get_kind())
@@ -708,9 +711,9 @@ class DatastoreInputReader(AbstractDatastoreInputReader):
       # Validate the value of each filter. We need to know filters have
       # valid value to carry out splits.
       try:
-        # NPF - modifed because _do_validate is not meant to be called with None
+        # NPF - modified because _do_validate is not meant to be called with None and so it works with .key queries
         if val is not None:
-          properties[prop]._do_validate(val)
+          getattr(model_class, prop)._do_validate(val)
       except db.BadValueError, e:
         raise errors.BadReaderParamsError(e)
 
@@ -2717,3 +2720,78 @@ class _ReducerReader(_GoogleCloudStorageRecordInputReader):
     result.current_key = _ReducerReader.decode_data(json["current_key"])
     result.current_values = _ReducerReader.decode_data(json["current_values"])
     return result
+
+
+# NPF Added to fix key_range query building (since we override our .query method on Model (probably shouldn't have!)
+def _filter_ndb_query(self, query, filters=None):
+  assert key_range._IsNdbQuery(query)
+
+  if filters:
+    for prop, op, val in filters:
+      # NPF - should use _comparison to build the FilterNode objects
+      query = query.filter(getattr(ndb.Model._kind_map[query.kind], prop)._comparison(op, val))
+
+  if self.include_start:
+    start_comparator = ">="
+  else:
+    start_comparator = ">"
+  if self.include_end:
+    end_comparator = "<="
+  else:
+    end_comparator = "<"
+  if self.key_start:
+    query = query.filter(ndb.FilterNode("__key__",
+                                        start_comparator,
+                                        self.key_start))
+  if self.key_end:
+    query = query.filter(ndb.FilterNode("__key__",
+                                        end_comparator,
+                                        self.key_end))
+  return query
+
+
+def _make_directed_ndb_query(self, kind_class, keys_only=False):
+  assert issubclass(kind_class, ndb.Model)
+  if keys_only:
+    default_options = ndb.QueryOptions(keys_only=True)
+  else:
+    default_options = None
+  # NPF - need to use ._query to bypass our HydrantModel override
+  query = kind_class._query(app=self._app,
+                            namespace=self.namespace,
+                            default_options=default_options)
+  query = self.filter_ndb_query(query)
+  if self.__get_direction(True, False):
+    query = query.order(kind_class._key)
+  else:
+    query = query.order(-kind_class._key)
+  return query
+
+
+def _make_ascending_ndb_query(self, kind_class, keys_only=False, filters=None):
+  """Construct an NDB query for this key range, without the scan direction.
+
+  Args:
+    kind_class: An ndb.Model subclass.
+    keys_only: bool, default False, query only for keys.
+
+  Returns:
+    An ndb.Query instance.
+  """
+  assert issubclass(kind_class, ndb.Model)
+  if keys_only:
+    default_options = ndb.QueryOptions(keys_only=True)
+  else:
+    default_options = None
+  # NPF - need to use ._query to bypass our HydrantModel override
+  query = kind_class._query(app=self._app,
+                            namespace=self.namespace,
+                            default_options=default_options)
+  query = self.filter_ndb_query(query, filters=filters)
+  query = query.order(kind_class._key)
+  return query
+
+
+key_range.KeyRange.filter_ndb_query = _filter_ndb_query
+key_range.KeyRange.make_directed_ndb_query = _make_directed_ndb_query
+key_range.KeyRange.make_ascending_ndb_query = _make_ascending_ndb_query
