@@ -689,10 +689,10 @@ class DatastoreInputReader(AbstractDatastoreInputReader):
 
     properties = model_class._properties
 
+
     for idx, f in enumerate(filters):
       prop, ineq, val = f
-      # NPF modified to allow querying by Model.key == XXX
-      if prop != 'key' and prop not in properties:
+      if prop not in properties:
         raise errors.BadReaderParamsError(
             "Property %s is not defined for entity type %s",
             prop, model_class._get_kind())
@@ -711,9 +711,9 @@ class DatastoreInputReader(AbstractDatastoreInputReader):
       # Validate the value of each filter. We need to know filters have
       # valid value to carry out splits.
       try:
-        # NPF - modified because _do_validate is not meant to be called with None and so it works with .key queries
+        # NPF - modified because _do_validate is not meant to be called with None
         if val is not None:
-          getattr(model_class, prop)._do_validate(val)
+          properties[prop]._do_validate(val)
       except db.BadValueError, e:
         raise errors.BadReaderParamsError(e)
 
@@ -2729,7 +2729,7 @@ def _filter_ndb_query(self, query, filters=None):
   if filters:
     for prop, op, val in filters:
       # NPF - should use _comparison to build the FilterNode objects
-      query = query.filter(getattr(ndb.Model._kind_map[query.kind], prop)._comparison(op, val))
+      query = query.filter(ndb.Model._kind_map[query.kind]._properties[prop]._comparison(op, val))
 
   if self.include_start:
     start_comparator = ">="
