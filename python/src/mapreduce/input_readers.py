@@ -454,14 +454,16 @@ class AbstractDatastoreInputReader(InputReader):
         if isinstance(value, ndb.Key):
           value = value.to_old_key()
         ds_query_with_filters.update({'%s %s' % (key, op): value})
-        try:
-          random_keys = ds_query_with_filters.Get(shard_count *
-                                                  oversampling_factor)
-        except db.NeedIndexError, why:
-          logging.warning('Need to add an index for optimal mapreduce-input'
-                          ' splitting:\n%s' % why)
-          # We'll try again without the filter.  We hope the filter
-          # will filter keys uniformly across the key-name space!
+      # NPF - modified to pull this out of the for loop
+      #       https://github.com/GoogleCloudPlatform/appengine-mapreduce/issues/108
+      try:
+        random_keys = ds_query_with_filters.Get(shard_count *
+                                                oversampling_factor)
+      except db.NeedIndexError, why:
+        logging.warning('Need to add an index for optimal mapreduce-input'
+                        ' splitting:\n%s' % why)
+        # We'll try again without the filter.  We hope the filter
+        # will filter keys uniformly across the key-name space!
 
     if not random_keys:
       random_keys = ds_query.Get(shard_count * oversampling_factor)
