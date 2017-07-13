@@ -453,11 +453,11 @@ class AbstractDatastoreInputReader(InputReader):
       for (key, op, value) in filters:
         ds_query_with_filters = copy.copy(ds_query_with_filters)
         ds_queries_with_filters.append(ds_query_with_filters)
-        # NPF - modifed because datastore queries need old ds keys
+        # BATTERII - modifed because datastore queries need old ds keys
         if isinstance(value, ndb.Key):
           value = value.to_old_key()
         ds_query_with_filters.update({'%s %s' % (key, op): value})
-      # NPF - modified to pull this out of the for loop
+      # BATTERII - modified to pull this out of the for loop
       #       https://github.com/GoogleCloudPlatform/appengine-mapreduce/issues/108
       while ds_queries_with_filters and not random_keys:
         ds_query_with_filters = ds_queries_with_filters.pop()
@@ -718,7 +718,7 @@ class DatastoreInputReader(AbstractDatastoreInputReader):
       # Validate the value of each filter. We need to know filters have
       # valid value to carry out splits.
       try:
-        # NPF - modified because _do_validate is not meant to be called with None
+        # BATTERII - modified because _do_validate is not meant to be called with None
         if val is not None:
           properties[prop]._do_validate(val)
       except db.BadValueError, e:
@@ -2729,13 +2729,13 @@ class _ReducerReader(_GoogleCloudStorageRecordInputReader):
     return result
 
 
-# NPF Added to fix key_range query building (since we override our .query method on Model (probably shouldn't have!)
+# BATTERII Added to fix key_range query building (since we override our .query method on Model (probably shouldn't have!)
 def _filter_ndb_query(self, query, filters=None):
   assert key_range._IsNdbQuery(query)
 
   if filters:
     for prop, op, val in filters:
-      # NPF - should use _comparison to build the FilterNode objects
+      # BATTERII - should use _comparison to build the FilterNode objects
       query = query.filter(ndb.Model._kind_map[query.kind]._properties[prop]._comparison(op, val))
 
   if self.include_start:
@@ -2763,7 +2763,7 @@ def _make_directed_ndb_query(self, kind_class, keys_only=False):
     default_options = ndb.QueryOptions(keys_only=True)
   else:
     default_options = None
-  # NPF - need to use ._query to bypass our HydrantModel override
+  # BATTERII - need to use ._query to bypass our HydrantModel override
   query = kind_class._query(app=self._app,
                             namespace=self.namespace,
                             default_options=default_options)
@@ -2790,7 +2790,7 @@ def _make_ascending_ndb_query(self, kind_class, keys_only=False, filters=None):
     default_options = ndb.QueryOptions(keys_only=True)
   else:
     default_options = None
-  # NPF - need to use ._query to bypass our HydrantModel override
+  # BATTERII - need to use ._query to bypass our HydrantModel override
   query = kind_class._query(app=self._app,
                             namespace=self.namespace,
                             default_options=default_options)

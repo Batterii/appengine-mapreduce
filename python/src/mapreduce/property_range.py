@@ -215,7 +215,7 @@ class PropertyRange(object):
       for f in self.filters:
         query.filter("%s %s" % (f[0], f[1]), f[2])
     else:
-      query = self.model_class._query(namespace=ns)  # NPF - modified to use NDB's _query, in case subclass has overridden
+      query = self.model_class._query(namespace=ns)  # BATTERII - modified to use NDB's _query, in case subclass has overridden
       for f in self.filters:
         query = query.filter(ndb.FilterNode(*f))
     return query
@@ -400,7 +400,7 @@ def _ord_to_str(ordinal, weights):
   return "".join(chars)
 
 
-# NPF - added... so we can do inequality on KeyProperties (provide a range)
+# BATTERII - added... so we can do inequality on KeyProperties (provide a range)
 def _split_key_property(start, end, n, include_start, include_end):
   start_id, end_id = start.id(), end.id()
   if type(start_id) != type(end_id):
@@ -427,7 +427,7 @@ _DISCRETE_PROPERTY_SPLIT_FUNCTIONS = {
     ndb.IntegerProperty: _split_integer_property,
     ndb.StringProperty: _split_string_property,
     ndb.BlobProperty: _split_byte_string_property,
-    ndb.KeyProperty: _split_key_property  # NPF - added... so we can do inequality on KeyProperties (provide a range)
+    ndb.KeyProperty: _split_key_property  # BATTERII - added... so we can do inequality on KeyProperties (provide a range)
 }
 
 _CONTINUOUS_PROPERTY_SPLIT_FUNCTIONS = {

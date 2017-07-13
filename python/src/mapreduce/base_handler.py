@@ -213,7 +213,7 @@ class JsonHandler(webapp.RequestHandler):
           403, message="Got JSON request with no X-Requested-With header")
       return
 
-    # NPF ADDED - only if this isn't being run by a task and only if the &ns= param is provided
+    # BATTERII ADDED - only if this isn't being run by a task and only if the &ns= param is provided
     if 'HTTP_X_APPENGINE_TASKNAME' not in self.request.environ and self.request.get('ns'):
       from google.appengine.api import namespace_manager
       namespace_manager.set_namespace(self.request.get('ns'))

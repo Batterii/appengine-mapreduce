@@ -111,7 +111,7 @@ function getResponseDataJson(error, data) {
 function listConfigs(resultFunc) {
   $.ajax({
     type: 'GET',
-    url: 'command/list_configs?ns='+getNS(),  //NPF MODIFIED
+    url: 'command/list_configs?ns='+getNS(),  //BATTERII MODIFIED
     dataType: 'text',
     error: function(request, textStatus) {
       getResponseDataJson(textStatus);
@@ -135,7 +135,7 @@ function listJobs(cursor, resultFunc) {
   setButter('Loading');
   $.ajax({
     type: 'GET',
-    url: 'command/list_jobs?ns='+getNS() + '&cursor=' + cursor,  //NPF MODIFIED
+    url: 'command/list_jobs?ns='+getNS() + '&cursor=' + cursor,  //BATTERII MODIFIED
     dataType: 'text',
     error: function(request, textStatus) {
       getResponseDataJson(textStatus);
@@ -163,7 +163,7 @@ function cleanUpJob(name, mapreduce_id) {
   $.ajax({
     async: false,
     type: 'POST',
-    url: 'command/cleanup_job?ns='+getNS(),  //NPF MODIFIED
+    url: 'command/cleanup_job?ns='+getNS(),  //BATTERII MODIFIED
     data: {'mapreduce_id': mapreduce_id},
     dataType: 'text',
     error: function(request, textStatus) {
@@ -190,7 +190,7 @@ function abortJob(name, mapreduce_id) {
   $.ajax({
     async: false,
     type: 'POST',
-    url: 'command/abort_job?ns='+getNS(),  //NPF MODIFIED
+    url: 'command/abort_job?ns='+getNS(),  //BATTERII MODIFIED
     data: {'mapreduce_id': mapreduce_id},
     dataType: 'text',
     error: function(request, textStatus) {
@@ -209,7 +209,7 @@ function abortJob(name, mapreduce_id) {
 function getJobDetail(jobId, resultFunc) {
   $.ajax({
     type: 'GET',
-    url: 'command/get_job_detail?ns='+getNS(),  //NPF MODIFIED
+    url: 'command/get_job_detail?ns='+getNS(),  //BATTERII MODIFIED
     dataType: 'text',
     data: {'mapreduce_id': jobId},
     statusCode: {
@@ -301,7 +301,7 @@ function getJobId() {
   return jobId == null ? '' : jobId;
 }
 
-// NPF ADDED - namespace option
+// BATTERII ADDED - namespace option
 function qs(key) {
     key = key.replace(/[*+?^$.\[\]{}()|\\\/]/g, "\\$&"); // escape RegEx meta chars
     var match = location.search.match(new RegExp("[?&]"+key+"=([^&]+)(&|$)"));
@@ -336,7 +336,7 @@ function initJobOverview(jobs, cursor) {
 
     $('<td>').append(
       $('<a>')
-        .attr('href', 'detail?ns='+getNS()+'&mapreduce_id=' + job.mapreduce_id)  //NPF MODIFIED
+        .attr('href', 'detail?ns='+getNS()+'&mapreduce_id=' + job.mapreduce_id)  //BATTERII MODIFIED
         .text('Detail')).appendTo(row);
 
     row.append($('<td>').text(job.mapreduce_id))
@@ -434,7 +434,7 @@ function runJob(name) {
   jobForm.find('input[type="submit"]').disabled = true;
   $.ajax({
     type: 'POST',
-    url: 'command/start_job?ns='+getNS(),  //NPF MODIFIED
+    url: 'command/start_job?ns='+getNS(),  //BATTERII MODIFIED
     data: jobForm.serialize(),
     dataType: 'text',
     error: function(request, textStatus) {
@@ -689,7 +689,7 @@ function initJobDetail(jobId, detail) {
   $('head > title').text(title);
   $('#detail-page-title').text(detail.name);
   $('#detail-page-undertext').text('Job #' + jobId);
-  $('#overview-link a').attr('href', 'status?ns='+getNS());  //NPF modified
+  $('#overview-link a').attr('href', 'status?ns='+getNS());  //BATTERII modified
 
   // Set control buttons.
   if (self != top) {
