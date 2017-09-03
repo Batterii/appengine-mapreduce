@@ -459,11 +459,13 @@ class AbstractDatastoreInputReader(InputReader):
         ds_query_with_filters.update({'%s %s' % (key, op): value})
       # BATTERII - modified to pull this out of the for loop
       #       https://github.com/GoogleCloudPlatform/appengine-mapreduce/issues/108
-      while ds_queries_with_filters and not random_keys:
+      good_index = False
+      while ds_queries_with_filters and not good_index:
         ds_query_with_filters = ds_queries_with_filters.pop()
         try:
           random_keys = ds_query_with_filters.Get(shard_count *
                                                   oversampling_factor)
+          good_index = True
         except db.NeedIndexError, why:
           logging.warning('Need to add an index for optimal mapreduce-input'
                           ' splitting:\n%s' % why)
