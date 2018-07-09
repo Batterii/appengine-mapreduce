@@ -3,6 +3,7 @@
   <application>mapreduce-example</application>
   <module>shuffler</module>
   <version>one</version>
+  <runtime>java8</runtime>
   <threadsafe>true</threadsafe>
 
   <!-- Larger / higher memory instances are useful for their improved sorting performance -->

@@ -3,7 +3,7 @@
   <application>mapreduce-example</application>
   <module>default</module>
   <version>one</version>
-
+  <runtime>java8</runtime>
   <threadsafe>true</threadsafe>
 
   <system-properties>
